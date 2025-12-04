@@ -1,36 +1,33 @@
 import unittest
-from src.main import calculate_mob_stats, Game, Creep, Flyer, Giant
+from src.components.mob import Mob
+from src.game import Game
 
-class TestCalculations(unittest.TestCase):
+class TestMobCreation(unittest.TestCase):
 
-    def test_mob_stats_wave_1(self):
-        base_health = 15
-        base_force = 20
-        health, force = calculate_mob_stats(base_health, base_force, 1)
-        self.assertAlmostEqual(health, 15)
-        self.assertAlmostEqual(force, 20)
+    def test_rempant_creation(self):
+        base_rempant_hp = 15
+        base_rempant_force = 20
+        mob = Mob(x=0, y=0, health=base_rempant_hp, speed=1, damage=base_rempant_force, mob_type='rempant')
+        self.assertEqual(mob.health, 15)
+        self.assertEqual(mob.damage, 20)
 
-    def test_mob_stats_wave_10(self):
-        base_health = 15
-        base_force = 20
-        health, force = calculate_mob_stats(base_health, base_force, 10)
-        self.assertAlmostEqual(health, 21.75)
-        self.assertAlmostEqual(force, 27.2)
+    def test_volant_creation(self):
+        base_rempant_hp = 15
+        base_rempant_force = 20
+        hp = base_rempant_hp / 1.10
+        force = base_rempant_force * 1.20
+        mob = Mob(x=0, y=0, health=hp, speed=1, damage=force, mob_type='volant')
+        self.assertAlmostEqual(mob.health, 13.636, places=3)
+        self.assertEqual(mob.damage, 24)
 
-    def test_creep_creation(self):
-        creep = Creep(100, 100, 1)
-        self.assertAlmostEqual(creep.health, 15)
-        self.assertAlmostEqual(creep.damage, 20)
-
-    def test_flyer_creation(self):
-        flyer = Flyer(100, 100, 1)
-        self.assertAlmostEqual(flyer.health, 15 / 1.10)
-        self.assertAlmostEqual(flyer.damage, 20 * 1.2)
-
-    def test_giant_creation(self):
-        giant = Giant(100, 100, 1)
-        self.assertAlmostEqual(giant.health, 15 * 1.4)
-        self.assertAlmostEqual(giant.damage, 24 * 1.2)
+    def test_geant_creation(self):
+        base_rempant_hp = 15
+        base_rempant_force = 20
+        hp = base_rempant_hp * 1.40
+        force = (base_rempant_force * 1.20) * 1.20
+        mob = Mob(x=0, y=0, health=hp, speed=1, damage=force, mob_type='geant')
+        self.assertEqual(mob.health, 21)
+        self.assertAlmostEqual(mob.damage, 28.8)
 
 if __name__ == '__main__':
     unittest.main()

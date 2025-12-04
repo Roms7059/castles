@@ -192,8 +192,6 @@ coût d’upgrade = fonction exponentielle (ex : coût_or = floor(100 * 1.5^leve
 
 Upgrades persistants (entre parties) : débloquables via or/exp/ chair.
 
-Upgrades de partie (reset après partie) : certaines améliorations temporaires payées en pain/exp.
-
 Arbres d’upgrade :
 
 FourniL : prod, capacité, vitesse, vie.
@@ -276,3 +274,31 @@ Interface de base (HUD) : temps, ressources, vie fournil/rempart, boutons upgrad
 Fournir README et code clair: classes Entité/Mob/Troupe/Bâtiment, fonctions de scaling des vagues, exemples de paramètres initiaux.
 
 Livrables : code Pygame exécutable, assets placeholders (rectangles/sprites), README, 5 tests unitaires pour calculs.
+
+
+
+        A      B      C      D      E      F      G      H
+      ---------------------------------------------------------
+8  |       |       |       |       |       |       |       | SPAWN |
+      ---------------------------------------------------------
+7  |       |       |       |       |       |       |       |       |
+      ---------------------------------------------------------
+6  |   R   |   R   |   R   |       |       |       |       | SPAWN |
+      ---------------------------------------------------------
+5  |       | FOURN |   R   |       |       |       |       |       |
+      ---------------------------------------------------------
+4  |   R   |   R   |   R   |       |       |       |       |       |
+      ---------------------------------------------------------
+3  |       |       |       |       |       |       |       | SPAWN |
+      ---------------------------------------------------------
+2  | MENU  | MENU  | MENU  | MENU  | MENU  | MENU  | MENU  | MENU  |
+      ---------------------------------------------------------
+1  | MENU  | MENU  | MENU  | MENU  | MENU  | MENU  | MENU  | MENU  |
+      ---------------------------------------------------------
+FOURN = fournil 
+
+R = rempart 
+
+MENU = ligne de placement des troupes
+
+SPAWN = points d’arrivée ennemis 
