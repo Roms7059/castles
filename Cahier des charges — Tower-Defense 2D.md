@@ -198,7 +198,7 @@ FourniL : prod, capacité, vitesse, vie.
 
 Rempart : vie, slots enchantement, niveau enchantement.
 
-Troupes : force, stamina, coût d’entraînement.
+Troupes : force, stamina.
 
 Les enchantements sont débloqués avant d’être placés (système de slots).
 

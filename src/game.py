@@ -214,12 +214,18 @@ class Game:
         if self.furnace.current_pain >= stats['cost']:
             self.furnace.current_pain -= stats['cost']
             
+            strength_level = self.troop_upgrades['strength']
+            stamina_level = self.troop_upgrades['stamina']
+
+            damage = stats['damage'] * (1 + 0.58 * strength_level)
+            health = stats['health'] * (1 + 0.45 * stamina_level)
+
             img = self.troop_images.get(troop_type)
             position = (self.furnace.rect.centerx, self.furnace.rect.centery)
             
             troop = Troop(x=position[0], y=position[1], 
-                          health=stats['health'], speed=stats['speed'], 
-                          damage=stats['damage'], troop_type=troop_type, 
+                          health=health, speed=stats['speed'], 
+                          damage=damage, troop_type=troop_type, 
                           attack_range=stats['range'], attack_cooldown=stats['cooldown'],
                           image=img)
             
@@ -232,6 +238,11 @@ class Game:
         base_count_per_wave = 20
         growth_per_wave = 12
         total_mobs = base_count_per_wave + (wave_number - 1) * growth_per_wave
+
+        if self.difficulty == 'Facile':
+            total_mobs *= 0.5
+        elif self.difficulty == 'Moyen':
+            total_mobs *= 0.75
 
         rempant_ratio = 0.6
         volant_ratio = 0.2
@@ -418,6 +429,11 @@ class Game:
         wave_text = hud_font.render(f'Vague: {self.wave_number}', True, (255, 255, 255))
         self.screen.blit(wave_text, (10, 40))
 
+        # Mob count
+        mobs_on_map = len([obj for obj in self.game_objects if isinstance(obj, Mob) and obj.is_alive()])
+        mob_count_text = hud_font.render(f'Mobs: {mobs_on_map}', True, (255, 255, 255))
+        self.screen.blit(mob_count_text, (self.screen_width - mob_count_text.get_width() - 10, 10))
+        
         # Currencies in the bottom menu
         menu_y = 6 * GRID_SIZE + 10
         gold_text = hud_font.render(f'Or: {self.gold}', True, (255, 215, 0))

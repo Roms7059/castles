@@ -1,14 +1,14 @@
 {
     "furnace_upgrades": {
-        "production_rate": 0,
-        "storage_capacity": 0,
-        "production_speed": 0,
-        "health": 0
+        "production_rate": 7,
+        "storage_capacity": 6,
+        "production_speed": 3,
+        "health": 3
     },
     "currencies": {
-        "gold": 3,
-        "exp": 3,
-        "flesh": 3
+        "gold": 8939,
+        "exp": 18270,
+        "flesh": 11056
     },
     "wall_upgrades": {
         "health": 0,
@@ -16,8 +16,8 @@
         "enchantment_level": 0
     },
     "troop_upgrades": {
-        "strength": 0,
-        "stamina": 0,
+        "strength": 22,
+        "stamina": 12,
         "training_cost": 0
     }
 }
