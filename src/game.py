@@ -22,7 +22,6 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.state = 'MENU'
-        self.difficulty = 'Moyen'
         self.game_timer = 0
         self.wave_timer = 0
         self.pain_consumption_timer = 0
@@ -33,36 +32,43 @@ class Game:
         self.save_manager = SaveManager()
         self.save_data = self.save_manager.load_game()
 
-        self.gold = self.save_data['currencies']['gold']
-        self.exp = self.save_data['currencies']['exp']
-        self.flesh = self.save_data['currencies']['flesh']
-
-        self.furnace_upgrades = self.save_data['furnace_upgrades']
-        self.wall_upgrades = self.save_data['wall_upgrades']
-        self.troop_upgrades = self.save_data['troop_upgrades']
+        self._load_game_state()
 
         self.upgrade_menu = UpgradeMenu(self)
 
         self._load_assets()
-
+        
         # Boutons de difficulté
         self.font = pygame.font.Font(None, 50)
-        self.easy_button_rect = pygame.Rect(self.screen_width / 2 - 150, self.screen_height / 2 - 50, 300, 70)
-        self.medium_button_rect = pygame.Rect(self.screen_width / 2 - 150, self.screen_height / 2 + 50, 300, 70)
-        self.hard_button_rect = pygame.Rect(self.screen_width / 2 - 150, self.screen_height / 2 + 150, 300, 70)
-        self.upgrades_button_rect = pygame.Rect(self.screen_width / 2 - 150, self.screen_height / 2 + 250, 300, 70)
+        self.upgrades_button_rect = pygame.Rect(50, self.screen_height / 2 + 250, 300, 70)
+        self.reset_button_rect = pygame.Rect(50, self.screen_height / 2 + 350, 300, 70)
         self.back_to_menu_button_rect = pygame.Rect(self.screen_width / 2 - 150, self.screen_height / 2 + 100, 300, 70)
         self.button_color = (100, 100, 100)
         
-        self.easy_text = self.font.render("Facile", True, (255, 255, 255))
-        self.medium_text = self.font.render("Moyen", True, (255, 255, 255))
-        self.hard_text = self.font.render("Difficile", True, (255, 255, 255))
         self.upgrades_text = self.font.render("Améliorations", True, (255, 255, 255))
+        self.reset_text = self.font.render("Réinitialiser", True, (255, 255, 255))
 
-        self.easy_text_rect = self.easy_text.get_rect(center=self.easy_button_rect.center)
-        self.medium_text_rect = self.medium_text.get_rect(center=self.medium_button_rect.center)
-        self.hard_text_rect = self.hard_text.get_rect(center=self.hard_button_rect.center)
         self.upgrades_text_rect = self.upgrades_text.get_rect(center=self.upgrades_button_rect.center)
+        self.reset_text_rect = self.reset_text.get_rect(center=self.reset_button_rect.center)
+
+        self.tier_buttons = []
+        self.tier_texts = []
+        self.tier_scroll_offset = 0
+        for i in range(10):
+            y = self.screen_height / 2 - 100 + i * 80
+            rect = pygame.Rect(self.screen_width - 250, y, 200, 60)
+            self.tier_buttons.append(rect)
+            text = self.font.render(f"Palier {i + 1}", True, (255, 255, 255))
+            self.tier_texts.append(text)
+
+    def _load_game_state(self):
+        self.gold = self.save_data['currencies']['gold']
+        self.exp = self.save_data['currencies']['exp']
+        self.flesh = self.save_data['currencies']['flesh']
+        self.tier = self.save_data.get('tier', 1)
+        self.furnace_upgrades = self.save_data['furnace_upgrades']
+        self.wall_upgrades = self.save_data['wall_upgrades']
+        self.troop_upgrades = self.save_data['troop_upgrades']
 
 
         self.troop_stats = {
@@ -134,6 +140,7 @@ class Game:
         self.save_data['currencies']['gold'] = self.gold
         self.save_data['currencies']['exp'] = self.exp
         self.save_data['currencies']['flesh'] = self.flesh
+        self.save_data['tier'] = self.tier
         self.save_manager.save_game(self.save_data)
 
     def events(self):
@@ -155,22 +162,24 @@ class Game:
                                 self.spawn_troop('assassin')
 
             elif self.state == 'MENU':
+                if event.type == pygame.MOUSEWHEEL:
+                    self.tier_scroll_offset -= event.y * 20
+                    self.tier_scroll_offset = max(0, min(self.tier_scroll_offset, len(self.tier_buttons) * 80 - self.screen_height / 2))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        if self.easy_button_rect.collidepoint(event.pos):
-                            self.difficulty = 'Facile'
-                            self.state = 'PLAYING'
-                            self.start_game()
-                        elif self.medium_button_rect.collidepoint(event.pos):
-                            self.difficulty = 'Moyen'
-                            self.state = 'PLAYING'
-                            self.start_game()
-                        elif self.hard_button_rect.collidepoint(event.pos):
-                            self.difficulty = 'Difficile'
-                            self.state = 'PLAYING'
-                            self.start_game()
-                        elif self.upgrades_button_rect.collidepoint(event.pos):
+                        for i, rect in enumerate(self.tier_buttons):
+                            if rect.collidepoint(event.pos):
+                                self.tier = i + 1
+                                self.state = 'PLAYING'
+                                self.start_game()
+                        if self.upgrades_button_rect.collidepoint(event.pos):
                             self.state = 'UPGRADE_MENU'
+                        elif self.reset_button_rect.collidepoint(event.pos):
+                            self.save_manager.reset_save()
+                            self.save_data = self.save_manager.load_game()
+                            self._load_game_state()
+                            # Also reset the upgrade menu to reflect the changes
+                            self.upgrade_menu = UpgradeMenu(self)
             
             elif self.state == 'UPGRADE_MENU':
                 self.upgrade_menu.handle_event(event)
@@ -239,10 +248,9 @@ class Game:
         growth_per_wave = 12
         total_mobs = base_count_per_wave + (wave_number - 1) * growth_per_wave
 
-        if self.difficulty == 'Facile':
-            total_mobs *= 0.5
-        elif self.difficulty == 'Moyen':
-            total_mobs *= 0.75
+        # Apply tier-based difficulty
+        tier_multiplier = 0.4 + 0.1 * self.tier
+        total_mobs *= tier_multiplier
 
         rempant_ratio = 0.6
         volant_ratio = 0.2
@@ -296,13 +304,7 @@ class Game:
                 self.state = 'GAME_OVER'
                 return
 
-            wave_interval = 0
-            if self.difficulty == 'Facile':
-                wave_interval = 120
-            elif self.difficulty == 'Moyen':
-                wave_interval = 60
-            elif self.difficulty == 'Difficile':
-                wave_interval = 30
+            wave_interval = 130 - 10 * self.tier
 
             if self.wave_number == 0:
                 self.wave_number += 1
@@ -396,14 +398,22 @@ class Game:
             img_rect = self.menu_furnace_image.get_rect(center=(self.screen_width / 2, self.screen_height / 2 - 200))
             self.screen.blit(self.menu_furnace_image, img_rect)
         
-        pygame.draw.rect(self.screen, self.button_color, self.easy_button_rect, border_radius=15)
-        self.screen.blit(self.easy_text, self.easy_text_rect)
-        pygame.draw.rect(self.screen, self.button_color, self.medium_button_rect, border_radius=15)
-        self.screen.blit(self.medium_text, self.medium_text_rect)
-        pygame.draw.rect(self.screen, self.button_color, self.hard_button_rect, border_radius=15)
-        self.screen.blit(self.hard_text, self.hard_text_rect)
         pygame.draw.rect(self.screen, self.button_color, self.upgrades_button_rect, border_radius=15)
         self.screen.blit(self.upgrades_text, self.upgrades_text_rect)
+        pygame.draw.rect(self.screen, self.button_color, self.reset_button_rect, border_radius=15)
+        self.screen.blit(self.reset_text, self.reset_text_rect)
+
+        tier_area = pygame.Rect(self.screen_width - 300, self.screen_height / 2 - 100, 250, 400)
+        pygame.draw.rect(self.screen, (10, 10, 10), tier_area)
+
+        for i, rect in enumerate(self.tier_buttons):
+            rect.y = self.screen_height / 2 - 100 + i * 80 - self.tier_scroll_offset
+            if tier_area.colliderect(rect):
+                color = (255, 0, 0) if self.tier == i + 1 else self.button_color
+                pygame.draw.rect(self.screen, color, rect, border_radius=10)
+                text = self.tier_texts[i]
+                text_rect = text.get_rect(center=rect.center)
+                self.screen.blit(text, text_rect)
 
     def draw_game(self):
         self.screen.fill((20, 80, 20))

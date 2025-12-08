@@ -21,8 +21,8 @@ class Furnace(Building):
         prod_multiplier = 0.1
         cap_increment = 10
 
-        self.production_rate = self.base_production_rate * (1.1 ** self.upgrades.get("production_rate", 0))
-        self.storage_capacity = self.base_storage_capacity * (1.1 ** self.upgrades.get("storage_capacity", 0))
+        self.production_rate = self.base_production_rate * (1.2 ** self.upgrades.get("production_rate", 0))
+        self.storage_capacity = self.base_storage_capacity * (1.2 ** self.upgrades.get("storage_capacity", 0))
         self.production_speed = self.base_production_speed * (0.9 ** self.upgrades.get("production_speed", 0))
 
         self.current_pain = 0

@@ -28,6 +28,10 @@ class SaveManager:
         with open(self.file_path, 'w') as f:
             json.dump(data, f, indent=4)
 
+    def reset_save(self):
+        default_data = self.get_default_save()
+        self.save_game(default_data)
+
     def get_default_save(self):
         return {
             "currencies": {
@@ -50,5 +54,6 @@ class SaveManager:
                 "strength": 0,
                 "stamina": 0,
                 "training_cost": 0
-            }
+            },
+            "tier": 1
         }

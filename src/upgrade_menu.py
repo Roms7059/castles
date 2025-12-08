@@ -185,7 +185,7 @@ class UpgradeMenu:
                 if back_button_rect.collidepoint(event.pos):
                     self.game.state = 'MENU'
                 
-                # Furnace and troop upgrade buttons
+                # Furnace and troup upgrade buttons
                 for upgrade_type, rect in self.buy_button_rects.items():
                     if rect.collidepoint(event.pos):
                         if upgrade_type in self.game.furnace_upgrades:
